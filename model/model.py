@@ -16,6 +16,10 @@ class PES(nn.Module):
         super().__init__()
         self.roberta_model = RobertaForMaskedLM.from_pretrained(args.model_name).to(device)
         self.roberta_model.resize_token_embeddings(args.vocab_size)
+        # 打印当前模型所在的设备
+        print(f"PES Model initialized on device: {device}")
+        if device.type == 'cuda':
+            print(f"Using GPU: {torch.cuda.get_device_name(0)}")
         for param in self.roberta_model.parameters():
             param.requires_grad = True
 

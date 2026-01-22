@@ -4,6 +4,7 @@ import time
 import torch
 import torch.nn as nn
 import tqdm
+import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, precision_score, recall_score
 from utils import pes_get_batch, calculate
 
@@ -53,6 +54,14 @@ def PES_train(args, device, traindata, devdata, testdata, node_event, printlog):
     printlog('len_arg: {}'.format(args.len_arg))
     printlog('Start training PES module...')
     breakout = 0
+    
+    # Lists for plotting
+    plot_epochs = []
+    plot_train_loss = []
+    plot_train_f1 = []
+    plot_dev_f1 = []
+    plot_test_f1 = []
+
     ##################################  epoch  #################################
     for epoch in range(args.num_epoch):
         print('=' * 20)
@@ -61,6 +70,7 @@ def PES_train(args, device, traindata, devdata, testdata, node_event, printlog):
 
         all_indices = torch.randperm(train_size).split(args.batch_size)
         loss_epoch = 0.0
+        total_loss = 0.0
         acc = 0.0
         all_label_ = []
         all_predt_ = []
@@ -118,6 +128,7 @@ def PES_train(args, device, traindata, devdata, testdata, node_event, printlog):
             # report
             # print(predt)
             loss_epoch += loss.item()
+            total_loss += loss.item()
             if i % (3000 // args.batch_size) == 0:
                 printlog('loss={:.4f}, acc={:.4f}, F1_score={:.4f}'.format(
                     loss_epoch / (3000 // args.batch_size), acc / 3000,
@@ -248,7 +259,39 @@ def PES_train(args, device, traindata, devdata, testdata, node_event, printlog):
         printlog("\t\tTP: {}, TP+FP: {}, TP+FN: {}".format(t_1, t_2, t_3))
         printlog("\t\tprecision score: {}".format(test_intra_cross['p']))
         printlog("\t\trecall score: {}".format(test_intra_cross['r']))
-        printlog("\t\tf1 score: {}".format(test_intra_cross['f1']))
+        printlog("\tf1 score: {}".format(test_intra_cross['f1']))
+
+        # Update plot lists
+        plot_epochs.append(epoch)
+        plot_train_loss.append(total_loss / total_step)
+        plot_train_f1.append(f1_score(all_label_, all_predt_, average=None)[1])
+        plot_dev_f1.append(dev_intra_cross['f1'])
+        plot_test_f1.append(test_intra_cross['f1'])
+
+        # Draw and save plot
+        plt.figure(figsize=(12, 5))
+        
+        plt.subplot(1, 2, 1)
+        plt.plot(plot_epochs, plot_train_loss, label='Train Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title('Training Loss')
+        plt.legend()
+        plt.grid(True)
+
+        plt.subplot(1, 2, 2)
+        plt.plot(plot_epochs, plot_train_f1, label='Train F1')
+        plt.plot(plot_epochs, plot_dev_f1, label='Dev F1')
+        plt.plot(plot_epochs, plot_test_f1, label='Test F1')
+        plt.xlabel('Epoch')
+        plt.ylabel('F1 Score')
+        plt.title('F1 Score Curves')
+        plt.legend()
+        plt.grid(True)
+
+        plt.tight_layout()
+        plt.savefig(args.log.replace('.txt', '.png'))
+        plt.close()
 
         breakout += 1
 

@@ -11,7 +11,7 @@ def parse_args():
     parser.add_argument('--num',            default=2,          type=int,       help='Number of event')
 
     # # model arguments
-    parser.add_argument('--model_name',   default='roberta-base', type=str, help='Log model name')
+    parser.add_argument('--model_name',   default='./model/roberta-base', type=str, help='Log model name')
     parser.add_argument('--vocab_size',     default=50271,      type=int,       help='Size of RoBERTa vocab')
     parser.add_argument('--len_arg',        default=334,        type=int,       help='Sentence length')
     parser.add_argument('--len_arg_node',   default=122,        type=int,       help='Node sentence length')
@@ -27,7 +27,7 @@ def parse_args():
     # # training arguments
     parser.add_argument('--seed',           default=209,        type=int,       help='seed for reproducibility')
     parser.add_argument('--wd',             default=1e-2,       type=float,     help='weight decay')
-    parser.add_argument('--num_epoch',      default=20,         type=int,       help='number of total epochs to run')
+    parser.add_argument('--num_epoch',      default=10,         type=int,       help='number of total epochs to run')
     parser.add_argument('--lr',             default=1e-3,       type=float,     help='initial hgnn learning rate')
     parser.add_argument('--t_lr',           default=1e-5,       type=float,     help='initial transformer learning rate')
     parser.add_argument('--mlp_lr',         default=2e-5,       type=float,     help='initial mlp learning rate')
